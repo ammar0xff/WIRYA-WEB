@@ -35,6 +35,9 @@ export async function syncToGitHub(
       // File doesn't exist yet
     }
 
+    const encoder = new TextEncoder()
+    const encodedContent = btoa(String.fromCharCode.apply(null, Array.from(encoder.encode(content))))
+
     // Commit to GitHub
     const commitRes = await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}/contents/${filePath}`, {
       method: "PUT",
@@ -44,7 +47,7 @@ export async function syncToGitHub(
       },
       body: JSON.stringify({
         message: commitMessage,
-        content: btoa(content),
+        content: encodedContent,
         sha,
       }),
     })
