@@ -172,39 +172,5 @@ export const services = [
       }
     ],
     "whatsappLink": "https://wa.me/96612345678?text=I%20want%20to%20order%20Cybersecurity"
-  },
-  {
-    "id": "custom-development",
-    "category": "development",
-    "nameAr": "تطوير برامج مخصصة",
-    "nameEn": "Custom Software Development",
-    "descriptionAr": "حلول برمجية حسب احتياجاتك",
-    "descriptionEn": "Custom software solutions",
-    "price": 7999,
-    "currency": "SAR",
-    "image": "/software-development-collaboration.png",
-    "detailedDescAr": "تطوير برامج مخصصة تناسب احتياجات مؤسستك بالكامل",
-    "detailedDescEn": "Develop custom software that fully meets your organization's needs",
-    "options": [
-      {
-        "id": "web",
-        "nameAr": "تطوير ويب",
-        "nameEn": "Web Development",
-        "priceModifier": 0
-      },
-      {
-        "id": "mobile",
-        "nameAr": "تطبيق موبايل",
-        "nameEn": "Mobile App",
-        "priceModifier": 3000
-      },
-      {
-        "id": "full-stack",
-        "nameAr": "نظام متكامل",
-        "nameEn": "Full Stack System",
-        "priceModifier": 6000
-      }
-    ],
-    "whatsappLink": "https://wa.me/96612345678?text=I%20want%20to%20order%20Custom%20Development"
   }
 ]
