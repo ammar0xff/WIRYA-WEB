@@ -1,18 +1,17 @@
 export const services = [
   {
     "id": "tech-support-24-7",
-    "category": "support",
-    "nameAr": "الدعم الفني 24/7",
+    "nameAr": "الدعم الفنيdddd",
     "nameEn": "24/7 Technical Support",
     "descriptionAr": "دعم فني متخصص طوال اليوم",
     "descriptionEn": "Specialized technical support all day",
+    "category": "support",
     "price": 299,
     "currency": "SAR",
     "image": "/technical-support-center.jpg",
+    "whatsappLink": "https://wa.me/96612345678?text=I%20want%20to%20order%20Technical%20Support",
     "detailedDescAr": "خدمة دعم فني شاملة توفر الاستجابة السريعة والحلول الفعالة لجميع مشاكلك التقنية بدون توقف",
     "detailedDescEn": "Comprehensive technical support service providing rapid response and effective solutions for all your technical issues without interruption",
-    "longDescriptionAr": "# الدعم الفني 24/7\n\nنوفر لك دعماً فنياً متخصصاً على مدار الساعة لضمان استمرارية عملك دون انقطاع.\n\n## ما نقدمه\n\n### استجابة فورية\n- فريق متاح 24/7\n- وقت استجابة أقل من 15 دقيقة\n- دعم عبر قنوات متعددة\n\n### حلول شاملة\n- حل المشاكل التقنية\n- صيانة وقائية\n- تحديثات منتظمة\n\n### خبرة متخصصة\n- فريق من المحترفين المعتمدين\n- خبرة في جميع الأنظمة\n- تدريب مستمر\n\n## الباقات المتاحة\n\n### الباقة الأساسية\n- دعم عبر البريد الإلكتروني\n- استجابة خلال ساعة\n- تقارير شهرية\n\n### الباقة الاحترافية\n- دعم عبر الهاتف والبريد\n- استجابة خلال 30 دقيقة\n- مدير حساب مخصص\n\n### الباقة المؤسسية\n- دعم فوري عبر جميع القنوات\n- استجابة خلال 15 دقيقة\n- فريق دعم مخصص",
-    "longDescriptionEn": "# 24/7 Technical Support\n\nWe provide specialized technical support around the clock to ensure your business continuity without interruption.\n\n## What We Offer\n\n### Immediate Response\n- Team available 24/7\n- Response time under 15 minutes\n- Support across multiple channels\n\n### Comprehensive Solutions\n- Technical problem solving\n- Preventive maintenance\n- Regular updates\n\n### Specialized Expertise\n- Team of certified professionals\n- Experience with all systems\n- Continuous training\n\n## Available Packages\n\n### Basic Package\n- Email support\n- Response within one hour\n- Monthly reports\n\n### Professional Package\n- Phone and email support\n- Response within 30 minutes\n- Dedicated account manager\n\n### Enterprise Package\n- Instant support across all channels\n- Response within 15 minutes\n- Dedicated support team",
     "options": [
       {
         "id": "basic",
@@ -32,8 +31,7 @@ export const services = [
         "nameEn": "Enterprise Package",
         "priceModifier": 500
       }
-    ],
-    "whatsappLink": "https://wa.me/96612345678?text=I%20want%20to%20order%20Technical%20Support"
+    ]
   },
   {
     "id": "digital-transformation",
