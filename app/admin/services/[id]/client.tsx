@@ -37,10 +37,28 @@ export default function EditService() {
     }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    alert(language === "ar" ? "تم حفظ التغييرات" : "Changes saved")
-    router.push("/admin/services")
+    try {
+      const res = await fetch("/api/admin/services", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: isNew ? "create" : "update",
+          service: isNew ? formData : { id: params.id, ...formData },
+        }),
+      })
+
+      if (res.ok) {
+        alert(language === "ar" ? "تم حفظ التغييرات" : "Changes saved")
+        router.push("/admin/services")
+      } else {
+        alert(language === "ar" ? "حدث خطأ" : "Error saving")
+      }
+    } catch (error) {
+      console.error("[v0] Save error:", error)
+      alert(language === "ar" ? "حدث خطأ" : "Error saving")
+    }
   }
 
   return (

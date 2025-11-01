@@ -1,5 +1,54 @@
 import { SERVICES } from "@/lib/services"
-import { type NextRequest, NextResponse } from "next/server"
+import type { NextRequest } from "next/server"
+import { NextResponse } from "next/server"
+
+function formatServicesFile(services: typeof SERVICES): string {
+  return `export interface ServiceOption {
+  id: string
+  nameAr: string
+  nameEn: string
+  priceModifier: number
+}
+
+export interface Service {
+  id: string
+  category: string
+  nameAr: string
+  nameEn: string
+  descriptionAr: string
+  descriptionEn: string
+  price: number
+  currency: string
+  image: string
+  options: ServiceOption[]
+  whatsappLink: string
+  detailedDescAr: string
+  detailedDescEn: string
+  detailedContentPath?: string
+  longDescriptionAr?: string
+  longDescriptionEn?: string
+}
+
+export interface ServiceCategory {
+  id: string
+  nameAr: string
+  nameEn: string
+}
+
+export const serviceCategories: ServiceCategory[] = [
+  { id: "support", nameAr: "الدعم والصيانة", nameEn: "Support & Maintenance" },
+  { id: "transformation", nameAr: "التحول الرقمي", nameEn: "Digital Transformation" },
+  { id: "consulting", nameAr: "الاستشارات", nameEn: "Consulting" },
+  { id: "optimization", nameAr: "تحسين الأداء", nameEn: "Optimization" },
+  { id: "security", nameAr: "الأمان السيبراني", nameEn: "Cybersecurity" },
+  { id: "development", nameAr: "تطوير البرامج", nameEn: "Development" },
+]
+
+export const services: Service[] = ${JSON.stringify(services, null, 2)}
+
+export const SERVICES = services
+`
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,81 +61,56 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: false, message: "Service not found" }, { status: 404 })
       }
 
-      SERVICES[serviceIndex] = service
+      SERVICES[serviceIndex] = { ...SERVICES[serviceIndex], ...service }
 
-      // Format the services content
-      const servicesContent = `export interface Service {
-  id: string
-  nameEn: string
-  nameAr: string
-  descriptionEn: string
-  descriptionAr: string
-  category: string
-  price: number
-  currency: string
-  features?: string[]
-}
+      const githubToken = request.headers.get("x-github-token")
+      const githubOwner = request.headers.get("x-github-owner")
+      const githubRepo = request.headers.get("x-github-repo")
 
-export const SERVICES: Service[] = ${JSON.stringify(SERVICES, null, 2)}
-`
-
-      // Try to sync to GitHub if config exists
-      const githubConfig = request.headers.get("x-github-config")
-      if (githubConfig) {
+      if (githubToken && githubOwner && githubRepo) {
         try {
-          const config = JSON.parse(githubConfig)
-          const syncRes = await fetch(
-            `https://api.github.com/repos/${config.owner}/${config.repo}/contents/lib/services.ts`,
-            {
-              method: "PUT",
-              headers: {
-                Authorization: `Bearer ${config.token}`,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                message: `Update service: ${service.nameEn}`,
-                content: Buffer.from(servicesContent).toString("base64"),
-              }),
+          const servicesContent = formatServicesFile(SERVICES)
+          await fetch(`https://api.github.com/repos/${githubOwner}/${githubRepo}/contents/lib/services.ts`, {
+            method: "PUT",
+            headers: {
+              Authorization: `Bearer ${githubToken}`,
+              "Content-Type": "application/json",
+              Accept: "application/vnd.github+json",
             },
-          )
-
-          if (!syncRes.ok) {
-            console.error("[v0] GitHub sync failed:", syncRes.statusText)
-          }
+            body: JSON.stringify({
+              message: `Update service: ${service.nameEn}`,
+              content: Buffer.from(servicesContent).toString("base64"),
+            }),
+          })
         } catch (e) {
           console.error("[v0] GitHub sync error:", e)
         }
       }
 
-      return NextResponse.json({ success: true, service })
+      return NextResponse.json({ success: true, service: SERVICES[serviceIndex] })
     }
 
     if (action === "delete") {
-      const filtered = SERVICES.filter((s) => s.id !== service.id)
+      const index = SERVICES.findIndex((s) => s.id === service.id)
+      if (index === -1) {
+        return NextResponse.json({ success: false, message: "Service not found" }, { status: 404 })
+      }
 
-      const servicesContent = `export interface Service {
-  id: string
-  nameEn: string
-  nameAr: string
-  descriptionEn: string
-  descriptionAr: string
-  category: string
-  price: number
-  currency: string
-  features?: string[]
-}
+      SERVICES.splice(index, 1)
 
-export const SERVICES: Service[] = ${JSON.stringify(filtered, null, 2)}
-`
+      const githubToken = request.headers.get("x-github-token")
+      const githubOwner = request.headers.get("x-github-owner")
+      const githubRepo = request.headers.get("x-github-repo")
 
-      if (request.headers.get("x-github-config")) {
+      if (githubToken && githubOwner && githubRepo) {
         try {
-          const config = JSON.parse(request.headers.get("x-github-config") || "{}")
-          await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}/contents/lib/services.ts`, {
+          const servicesContent = formatServicesFile(SERVICES)
+          await fetch(`https://api.github.com/repos/${githubOwner}/${githubRepo}/contents/lib/services.ts`, {
             method: "PUT",
             headers: {
-              Authorization: `Bearer ${config.token}`,
+              Authorization: `Bearer ${githubToken}`,
               "Content-Type": "application/json",
+              Accept: "application/vnd.github+json",
             },
             body: JSON.stringify({
               message: `Delete service: ${service.nameEn}`,
@@ -102,32 +126,31 @@ export const SERVICES: Service[] = ${JSON.stringify(filtered, null, 2)}
     }
 
     if (action === "create") {
-      const newService = { ...service, id: Date.now().toString() }
+      const newService = {
+        ...service,
+        id: `service-${Date.now()}`,
+        image: service.image || "/customer-service-interaction.png",
+        options: service.options || [],
+        whatsappLink: service.whatsappLink || "#",
+        detailedDescAr: service.descriptionAr,
+        detailedDescEn: service.descriptionEn,
+        currency: "SAR",
+      }
       SERVICES.push(newService)
 
-      const servicesContent = `export interface Service {
-  id: string
-  nameEn: string
-  nameAr: string
-  descriptionEn: string
-  descriptionAr: string
-  category: string
-  price: number
-  currency: string
-  features?: string[]
-}
+      const githubToken = request.headers.get("x-github-token")
+      const githubOwner = request.headers.get("x-github-owner")
+      const githubRepo = request.headers.get("x-github-repo")
 
-export const SERVICES: Service[] = ${JSON.stringify(SERVICES, null, 2)}
-`
-
-      if (request.headers.get("x-github-config")) {
+      if (githubToken && githubOwner && githubRepo) {
         try {
-          const config = JSON.parse(request.headers.get("x-github-config") || "{}")
-          await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}/contents/lib/services.ts`, {
+          const servicesContent = formatServicesFile(SERVICES)
+          await fetch(`https://api.github.com/repos/${githubOwner}/${githubRepo}/contents/lib/services.ts`, {
             method: "PUT",
             headers: {
-              Authorization: `Bearer ${config.token}`,
+              Authorization: `Bearer ${githubToken}`,
               "Content-Type": "application/json",
+              Accept: "application/vnd.github+json",
             },
             body: JSON.stringify({
               message: `Add service: ${service.nameEn}`,
