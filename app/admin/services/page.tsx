@@ -11,10 +11,29 @@ import { SERVICES } from "@/lib/services"
 export default function ServicesManager() {
   const { language } = useTheme()
   const [services, setServices] = useState(SERVICES)
+  const [isDeleting, setIsDeleting] = useState<string | null>(null)
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
+    const service = services.find((s) => s.id === id)
+    if (!service) return
+
     if (confirm(language === "ar" ? "هل تريد حذف هذه الخدمة؟" : "Delete this service?")) {
-      setServices(services.filter((s) => s.id !== id))
+      setIsDeleting(id)
+      try {
+        const res = await fetch("/api/admin/services", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "delete", service }),
+        })
+
+        if (res.ok) {
+          setServices(services.filter((s) => s.id !== id))
+        }
+      } catch (error) {
+        console.error("[v0] Delete error:", error)
+      } finally {
+        setIsDeleting(null)
+      }
     }
   }
 
@@ -63,6 +82,7 @@ export default function ServicesManager() {
                   variant="outline"
                   size="sm"
                   onClick={() => handleDelete(service.id)}
+                  disabled={isDeleting === service.id}
                   className="text-destructive hover:text-destructive"
                 >
                   <Trash2 className="h-4 w-4" />
