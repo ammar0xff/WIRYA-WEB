@@ -295,3 +295,5 @@ We help you in your organization's comprehensive digital transformation journey 
     whatsappLink: "https://wa.me/96612345678?text=I%20want%20to%20order%20Custom%20Development",
   },
 ]
+
+export const SERVICES = services
