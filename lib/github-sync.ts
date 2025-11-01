@@ -36,7 +36,12 @@ export async function syncToGitHub(
     }
 
     const encoder = new TextEncoder()
-    const encodedContent = btoa(String.fromCharCode.apply(null, Array.from(encoder.encode(content))))
+    const uint8Array = encoder.encode(content)
+    let binaryString = ""
+    for (let i = 0; i < uint8Array.length; i++) {
+      binaryString += String.fromCharCode(uint8Array[i])
+    }
+    const encodedContent = btoa(binaryString)
 
     // Commit to GitHub
     const commitRes = await fetch(`https://api.github.com/repos/${config.owner}/${config.repo}/contents/${filePath}`, {
