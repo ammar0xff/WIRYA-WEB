@@ -8,9 +8,10 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useParams, useRouter } from "next/navigation"
-import { SERVICES } from "@/lib/services"
-import { ArrowLeft } from "lucide-react"
+import { SERVICES, serviceCategories } from "@/lib/services"
+import { ArrowLeft, Upload } from "lucide-react"
 import Link from "next/link"
+import { syncToGitHub, getGitHubConfig } from "@/lib/github-sync"
 
 export default function EditService() {
   const { language } = useTheme()
@@ -21,43 +22,66 @@ export default function EditService() {
   const service = isNew ? null : SERVICES.find((s) => s.id === params.id)
 
   const [formData, setFormData] = useState({
+    id: service?.id || `service-${Date.now()}`,
     nameAr: service?.nameAr || "",
     nameEn: service?.nameEn || "",
     descriptionAr: service?.descriptionAr || "",
     descriptionEn: service?.descriptionEn || "",
     category: service?.category || "support",
     price: service?.price || 0,
+    currency: service?.currency || "SAR",
+    image: service?.image || "",
+    whatsappLink: service?.whatsappLink || "",
+    detailedDescAr: service?.detailedDescAr || "",
+    detailedDescEn: service?.detailedDescEn || "",
+    options: service?.options || [],
   })
+
+  const [isSaving, setIsSaving] = useState(false)
+  const [saveStatus, setSaveStatus] = useState("")
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: name === "price" ? Number.parseFloat(value) : value,
     }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    try {
-      const res = await fetch("/api/admin/services", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: isNew ? "create" : "update",
-          service: isNew ? formData : { id: params.id, ...formData },
-        }),
-      })
+    setIsSaving(true)
+    setSaveStatus(language === "ar" ? "جاري الحفظ..." : "Saving...")
 
-      if (res.ok) {
-        alert(language === "ar" ? "تم حفظ التغييرات" : "Changes saved")
-        router.push("/admin/services")
+    try {
+      const config = await getGitHubConfig()
+      if (!config?.token) {
+        setSaveStatus(language === "ar" ? "يرجى تكوين GitHub" : "Please configure GitHub")
+        setIsSaving(false)
+        return
+      }
+
+      const updatedServices = isNew ? [...SERVICES, formData] : SERVICES.map((s) => (s.id === params.id ? formData : s))
+
+      const fileContent = `export const services = ${JSON.stringify(updatedServices, null, 2)}`
+
+      const result = await syncToGitHub(
+        config,
+        "lib/services.ts",
+        fileContent,
+        `[Admin] ${isNew ? "Added" : "Updated"} service: ${formData.nameEn}`,
+      )
+
+      if (result.success) {
+        setSaveStatus(language === "ar" ? "تم الحفظ بنجاح" : "Saved successfully")
+        setTimeout(() => router.push("/admin/services"), 1500)
       } else {
-        alert(language === "ar" ? "حدث خطأ" : "Error saving")
+        setSaveStatus(result.message)
       }
     } catch (error) {
-      console.error("[v0] Save error:", error)
-      alert(language === "ar" ? "حدث خطأ" : "Error saving")
+      setSaveStatus(error instanceof Error ? error.message : "Error saving")
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -120,9 +144,11 @@ export default function EditService() {
                 onChange={handleChange}
                 className="w-full px-3 py-2 bg-input border border-border rounded-md text-foreground"
               >
-                <option value="support">Support</option>
-                <option value="transformation">Transformation</option>
-                <option value="consulting">Consulting</option>
+                {serviceCategories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {language === "ar" ? cat.nameAr : cat.nameEn}
+                  </option>
+                ))}
               </select>
             </div>
             <div>
@@ -168,9 +194,12 @@ export default function EditService() {
             />
           </div>
 
+          {saveStatus && <div className="p-3 bg-accent/10 text-accent rounded-lg text-sm">{saveStatus}</div>}
+
           <div className="flex gap-4">
-            <Button type="submit" className="bg-accent hover:bg-accent/90">
-              {language === "ar" ? "حفظ" : "Save"}
+            <Button type="submit" disabled={isSaving} className="gap-2 bg-accent hover:bg-accent/90">
+              <Upload className="h-4 w-4" />
+              {isSaving ? "Saving..." : language === "ar" ? "حفظ" : "Save"}
             </Button>
             <Link href="/admin/services">
               <Button variant="outline">{language === "ar" ? "إلغاء" : "Cancel"}</Button>
