@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useParams, useRouter } from "next/navigation"
-import { SERVICES, serviceCategories } from "@/lib/services"
+import { services, serviceCategories } from "@/lib/services"
 import { ArrowLeft, Upload } from "lucide-react"
 import Link from "next/link"
 import { syncToGitHub, getGitHubConfig } from "@/lib/github-sync"
@@ -19,7 +19,7 @@ export default function EditService() {
   const router = useRouter()
   const isNew = params.id === "new"
 
-  const service = isNew ? null : SERVICES.find((s) => s.id === params.id)
+  const service = isNew ? null : services.find((s) => s.id === params.id)
 
   const [formData, setFormData] = useState({
     id: service?.id || `service-${Date.now()}`,
@@ -61,7 +61,7 @@ export default function EditService() {
         return
       }
 
-      const updatedServices = isNew ? [...SERVICES, formData] : SERVICES.map((s) => (s.id === params.id ? formData : s))
+      const updatedServices = isNew ? [...services, formData] : services.map((s) => (s.id === params.id ? formData : s))
 
       const fileContent = `export const services = ${JSON.stringify(updatedServices, null, 2)}`
 

@@ -6,12 +6,11 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Plus, Edit2, Trash2, Upload } from "lucide-react"
 import Link from "next/link"
-import { SERVICES } from "@/lib/services"
 import { syncToGitHub, getGitHubConfig } from "@/lib/github-sync"
 
 export default function ServicesManager() {
   const { language } = useTheme()
-  const [services, setServices] = useState(SERVICES)
+  const [services, setServices] = useState(services)
   const [isDeleting, setIsDeleting] = useState<string | null>(null)
   const [isSyncing, setIsSyncing] = useState(false)
   const [syncStatus, setSyncStatus] = useState<string>("")
