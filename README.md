@@ -208,7 +208,7 @@ Additional text...
 - Lists: `- item` or `1. item`
 - Links: `[text](url)`
 - Images: `![alt](url)`
-- Code: `` `inline` `` or ` ```language\ncode\n``` `
+- Code: `` `inline` `` or ` \`\`\`language\ncode\n\`\`\` `
 
 ### Adding a Service
 
@@ -286,6 +286,29 @@ export const translations = {
 2. Import your repository in [Vercel](https://vercel.com)
 3. Vercel will automatically detect Next.js and configure the build
 4. Click "Deploy"
+
+### Deploy to GitHub Pages
+
+This project includes a GitHub Actions workflow for automatic deployment to GitHub Pages:
+
+1. **Enable GitHub Pages**:
+   - Go to your repository Settings → Pages
+   - Under "Build and deployment", select "GitHub Actions" as the source
+
+2. **Update Base Path**:
+   - The `next.config.mjs` is configured with `basePath: '/WIRYA-WEB'`
+   - If your repository name is different, update this value in `next.config.mjs`
+
+3. **Push to Main Branch**:
+   - The workflow automatically triggers on push to `main` branch
+   - Your site will be available at `https://[username].github.io/[repo-name]`
+
+4. **Manual Deployment**:
+   - Go to Actions tab in your repository
+   - Select "Deploy to GitHub Pages" workflow
+   - Click "Run workflow"
+
+**Note**: GitHub Pages serves static files only. Some features like API routes and server actions won't work. The site will function as a fully static website with all content pre-rendered at build time.
 
 ### Deploy to Other Platforms
 
